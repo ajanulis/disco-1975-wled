@@ -34,6 +34,9 @@
  *   Custom2  = Pilot    — brightness of the idle home dots (0 = off)
  *   Option1  = Carousel — idle rotation on/off
  *   Option2  = Sleep    — silence timeout + night sleep on/off
+ *   Palette  — band colors. "Default" = classic red/yellow/green/blue;
+ *              any other palette is sampled at 4 even points
+ *              (bass = palette start ... treble = palette end)
  *
  * Settings (Config -> Usermods -> Disco1975):
  *   sleepAfterMin — minutes of silence before sleeping (default 5)
@@ -71,6 +74,7 @@ typedef struct Disco1975Data {
   bool     sleeping;
 } disco1975_t;
 
+// classic colors, used with the "Default" palette (authentic tsvetomuzyka)
 static const uint32_t d75_colors[D75_NB] = {
   RGBW32(255,   0, 0, 0),   // red    — bass, outer ends
   RGBW32(255, 200, 0, 0),   // yellow
@@ -197,6 +201,14 @@ static uint16_t mode_disco1975(void) {
     bright[z] = br * br;
   }
 
+  // --- band colors: classic set on "Default" palette, else sample the
+  //     selected palette at 4 even points (bass = start ... treble = end) ----
+  uint32_t bandCol[D75_NB];
+  for (int z = 0; z < D75_NB; z++)
+    bandCol[z] = (SEGMENT.palette == 0) ? d75_colors[z]
+               : SEGMENT.color_from_palette(z * 255 / (D75_NB - 1),
+                                            false, false, 255);
+
   // --- render (compute left half, mirror; pilot dots on full strip) --------
   for (int i = 0; i < half; i++) {
     int   best  = 0;
@@ -219,7 +231,7 @@ static uint16_t mode_disco1975(void) {
         if (pv > v) { v = pv; win = z % D75_NB; }
       }
       v = v * v * dissolve;                            // gamma ~2 + night dissolve
-      uint32_t c = d75_colors[win];
+      uint32_t c = bandCol[win];
       // round, don't truncate: keeps hue true at low brightness
       SEGMENT.setPixelColor(px, RGBW32((uint8_t)(R(c) * v + 0.5f),
                                        (uint8_t)(G(c) * v + 0.5f),
@@ -230,7 +242,7 @@ static uint16_t mode_disco1975(void) {
 }
 
 static const char _data_FX_MODE_DISCO1975[] PROGMEM =
-  "Disco 1975@Attack,Fade,Reach,Pilot,,Carousel,Sleep timer;;!;1f;sx=92,ix=100,c1=200,c2=128,o1=1,o2=1";
+  "Disco 1975@Attack,Fade,Reach,Pilot,,Carousel,Sleep timer;;!;1f;sx=92,ix=100,c1=200,c2=128,o1=1,o2=1,pal=0";
 
 class Disco1975Usermod : public Usermod {
   private:

@@ -83,6 +83,7 @@ Effect sliders (live, in the main UI):
 | Custom2 (*Pilot*) | brightness of the idle home dots (0 = off) |
 | Option1 (*Carousel*) | idle rotation on/off |
 | Option2 (*Sleep timer*) | silence dissolve + night sleep on/off |
+| Palette | band colors — **Default** = the classic red/yellow/green/blue; any other palette is sampled at 4 even points (bass = palette start … treble = palette end) |
 
 Settings (Config → Usermods → Disco1975):
 
