@@ -40,7 +40,9 @@
  *
  * Settings (Config -> Usermods -> Disco1975):
  *   sleepAfterMin — minutes of silence before sleeping (default 5)
- *   wakeHour      — hour (0-23) the effect auto-wakes; -1 = manual wake only
+ *   wakeHour      — hour (0-23) the effect auto-wakes; -1 = manual wake only.
+ *                   Also powers WLED back ON if the strip was switched off
+ *                   while Disco 1975 was the main-segment effect
  *
  * Band mapping: fftResult[] bins -> 4 bands is set below (d75_binLo/Hi).
  * Defaults are measured for a boxed I2S PDM mic (Athom/IoTorero sound-
@@ -247,11 +249,30 @@ static const char _data_FX_MODE_DISCO1975[] PROGMEM =
 class Disco1975Usermod : public Usermod {
   private:
     static const char _name[];
+    uint8_t fxId = 255;
   public:
     void setup() {
-      strip.addEffect(255, &mode_disco1975, _data_FX_MODE_DISCO1975);
+      fxId = strip.addEffect(255, &mode_disco1975, _data_FX_MODE_DISCO1975);
     }
-    void loop() {}
+
+    // Power-on wake: the effect can't run while WLED is off, so wakeHour is
+    // also checked here — if the strip was switched OFF with Disco 1975 as
+    // the main-segment effect, power WLED back on at wake time.
+    void loop() {
+      static unsigned long lastCheck   = 0;
+      static uint8_t       lastFireDay = 0;   // once-per-day latch
+      if (millis() - lastCheck < 2000) return;
+      lastCheck = millis();
+      if (d75_wakeHour < 0 || bri != 0) return;              // disabled / already on
+      if (hour(localTime)   != d75_wakeHour) return;
+      if (minute(localTime) != 0)            return;
+      if (day(localTime)    == lastFireDay)  return;
+      if (strip.getMainSegment().mode != fxId) return;       // only wake our effect
+      lastFireDay = day(localTime);
+      strip.getMainSegment().markForReset();                 // fresh state, not sleeping
+      toggleOnOff();
+      stateUpdated(CALL_MODE_BUTTON);
+    }
 
     void addToConfig(JsonObject& root) {
       JsonObject top = root.createNestedObject(FPSTR(_name));

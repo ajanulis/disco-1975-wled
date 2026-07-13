@@ -110,7 +110,7 @@ Settings (Config → Usermods → Disco1975):
 | Setting | Meaning |
 |---|---|
 | `sleepAfterMin` | minutes of silence before sleeping (default 5) |
-| `wakeHour` | hour (0–23) the effect auto-wakes; **-1** = wake manually only |
+| `wakeHour` | hour (0–23) the effect auto-wakes; **-1** = wake manually only. Also powers WLED back **on** at that hour if the strip was switched off while Disco 1975 was the main-segment effect |
 
 ## Tuning for your microphone
 
