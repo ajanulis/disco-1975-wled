@@ -85,6 +85,26 @@ Effect sliders (live, in the main UI):
 | Option2 (*Sleep timer*) | silence dissolve + night sleep on/off |
 | Palette | band colors — **Default** = the classic red/yellow/green/blue; any other palette is sampled at 4 even points (bass = palette start … treble = palette end) |
 
+### Custom band colors (any 4 you want)
+
+WLED's segment UI only offers 3 color slots, but **custom palettes** have no
+such limit. The effect samples the selected palette at indices **0, 85, 170
+and 255** — so a 4-stop custom palette with stops exactly there gives you 4
+exact colors, bass to treble:
+
+1. Open the built-in editor at `http://<wled-ip>/cpal.htm` (or upload a
+   `palette0.json` to the filesystem at `http://<wled-ip>/edit`):
+
+   ```json
+   {"palette":[0,"FF0080",85,"FF00FF",170,"00FFFF",255,"0040FF"]}
+   ```
+
+2. Pick **"~ Custom 1 ~"** from the palette dropdown (last entries in the
+   list). `palette0.json` = Custom 1 … `palette9.json` = Custom 10.
+
+Setting stops at other positions works too — the 4 sample points just land
+on whatever the gradient shows there.
+
 Settings (Config → Usermods → Disco1975):
 
 | Setting | Meaning |
